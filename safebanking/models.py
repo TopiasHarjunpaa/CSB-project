@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Create your models here.
-
-class Account(models.Model):
-	owner = models.ForeignKey(User, on_delete=models.CASCADE)
-	iban = models.TextField()
+class User_account(models.Model):
+	username = models.TextField()
+	password = models.TextField()
+	balance = models.IntegerField()
 
