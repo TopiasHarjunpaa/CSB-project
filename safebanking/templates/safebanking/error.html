@@ -6,8 +6,17 @@
     </head>
 
     <body>
-        <p>Error: {{message}}</p>
+        <p>Error: {{request.session.error}}</p>
+
+        {% if request.session.user_id != None %}
+        <form action="/main/{{request.session.user_id}}" method="GET">
+            <input type="submit" value="Back">
+        </form>
+        {% else %}
+        <form action="/" method="GET">
+            <input type="submit" value="Back">
+        </form>
+        {% endif %}
     </body>
 
-    </body>
 </html>

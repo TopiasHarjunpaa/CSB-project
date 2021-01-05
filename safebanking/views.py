@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from .models import User_account
@@ -12,7 +13,6 @@ import json
 def index(request):
     return render(request, "safebanking/index.html")
 
-#Check if this needed?
 def errorView(request):
     return render(request, "safebanking/error.html")
 
@@ -20,7 +20,8 @@ def logoutView(request):
     del request.session["user_id"]
     return redirect("index")
 
-def loginView(request):
+@csrf_exempt
+def loginView(request):    
     if request.method == "GET":
         #Check if user has already logged in
         if request.session.get("user_id", None):
@@ -38,8 +39,11 @@ def loginView(request):
             request.session["user_id"] = user_id
             return redirect(reverse("main", kwargs = {"User_account_id" : user_id}))
         else:
-            return render(request, "safebanking/error.html", {"message" : "Wrong username or password"})
+            request.session["error"] = "Wrong username or password"
+            return redirect("error")
+            #return render(request, "safebanking/error.html", {"message" : "Wrong username or password"})
 
+@csrf_exempt
 def signinView(request):
     if request.method == "GET":
         return render(request, "safebanking/signin.html")
@@ -49,7 +53,9 @@ def signinView(request):
         password = request.POST["password"]
         #Prevent creating a user with already existing username
         if len(User_account.objects.filter(username = username)) != 0:
-            return render(request, "safebanking/error.html", {"message" : "User already exist!"})
+            request.session["error"] = "User already exist!"
+            return redirect("error") 
+            #return render(request, "safebanking/error.html", {"message" : "User already exist!"})
         else:
             user = User_account.objects.create(username = username, password = password, balance = 1000)
             user_id = user.id
@@ -67,11 +73,13 @@ def transferView(request):
     amount = int(request.GET.get("amount"))
 
     #Prevent adding negative amounts etc...
-    user.balance -= amount
-    to.balance += amount
-
-    user.save()
-    to.save()
-
-    return redirect(reverse("main", kwargs = {"User_account_id" : user.id}))  
+    if user.balance >= amount and to.username != user.username and amount >= 0:
+        user.balance -= amount
+        to.balance += amount
+        user.save()
+        to.save()
+        return redirect(reverse("main", kwargs = {"User_account_id" : user.id}))
+    else:
+        request.session["error"] = "Transfer failed"
+        return redirect("error")
 
