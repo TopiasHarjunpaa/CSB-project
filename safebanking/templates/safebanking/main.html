@@ -1,48 +1,29 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <title>Safe Bank</title>
-        <p>Safest bank in the city</p>
-    </head>
+{% extends "./base.html" %}
+{% block title %}Login page{% endblock %}
 
-    <body>
-        <p>Welcome {{owner.username}}</p>
-        <p>Your id {{owner.id}}</p>
-        <p>Your password {{owner.password}}</p>
-        <p>Your balance {{owner.balance}}</p>
-        <p>Sessions: {{request.session.user_id}}</p>
+{% block content %}
 
-        <p>List of all users:</p>
-		<ul>
-            {% for user in users %}
-            
-            <li>{{user.id}} Username: {{user.username}} Password: {{user.password}} Balance: {{user.balance}}</li>
-
-            {% endfor %}
-        </ul>
-
+<div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
+            margin-bottom: 30px; min-height: 350px; border-radius: 50px;
+            margin-left: auto; margin-right: auto; max-width: 45em;">
+    <div style="text-align: center;">
+        <h1 style="margin-bottom: 25px;">Welcome {{owner.username}}</h1>
+        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
         <form action="/transfer/" method="GET">
             <span>Transfer money to:</span>
             <select name="to">
-			{% for user in users %}
+            {% for user in users %}
                 {% if owner.id != user.id %} 
                 <option value="{{user.id}}">{{user.username}}</option>
                 {% endif %}
-			{% endfor %}
+            {% endfor %}
             </select><br/>
             <span>Amount:</span>
             <input type="number" name="amount">
             <input type="hidden" name="user_id" value={{owner.id}}>
             <input type="submit" value="Transfer">
-        </form>        
+        </form>   
+    </div>
+</div>
 
-        {% if owner.id == request.session.user_id %}
-        <form action="/logout/" method="GET">
-            <input type="submit" value="Logout">
-        </form>
-        {% endif %}
-
-    </body>
-
-    </body>
-</html>
+{% endblock %}

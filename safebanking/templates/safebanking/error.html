@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <title>Safe Bank</title>
-        <p>Safest bank in the city</p>
-    </head>
+{% extends "./base.html" %}
+{% block title %}Start page{% endblock %}
+{% block content %}
 
-    <body>
-        <p>Error: {{request.session.error}}</p>
+<div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
+            margin-bottom: 30px; min-height: 350px; border-radius: 50px;
+            margin-left: auto; margin-right: auto; max-width: 45em;">
+    <div style="text-align: center;">
+        <h1 style="margin-bottom: 25px;">Error!</h1>
+        <h6>{{request.session.error}}</h6>
+    </div>
+</div>
 
-        {% if request.session.user_id != None %}
-        <form action="/main/{{request.session.user_id}}" method="GET">
-            <input type="submit" value="Back">
-        </form>
-        {% else %}
-        <form action="/" method="GET">
-            <input type="submit" value="Back">
-        </form>
-        {% endif %}
-    </body>
-
-</html>
+{% endblock %}
