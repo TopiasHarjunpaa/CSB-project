@@ -8,21 +8,7 @@
             margin-left: auto; margin-right: auto; max-width: 45em;">
     <div style="text-align: center;">
         <h1 style="margin-bottom: 25px;">Welcome {{owner.username}}</h1>
-        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
-        <form action="/transfer/" method="GET">
-            <span>Transfer money to:</span>
-            <select name="to">
-            {% for user in users %}
-                {% if owner.id != user.id %} 
-                <option value="{{user.id}}">{{user.username}}</option>
-                {% endif %}
-            {% endfor %}
-            </select><br/>
-            <span>Amount:</span>
-            <input type="number" name="amount">
-            <input type="hidden" name="user_id" value={{owner.id}}>
-            <input type="submit" value="Transfer">
-        </form>   
+        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>      
     </div>
 </div>
 

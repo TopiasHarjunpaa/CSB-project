@@ -1,0 +1,30 @@
+{% extends "./base.html" %}
+{% block title %}Login page{% endblock %}
+
+{% block content %}
+
+<div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
+            margin-bottom: 30px; min-height: 350px; border-radius: 50px;
+            margin-left: auto; margin-right: auto; max-width: 45em;">
+    <div style="text-align: center;">
+        <h1 style="margin-bottom: 25px;">Transfer money</h1>
+        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
+        <form action="/transfer/{{owner.id}}/" method="POST">
+            <span>Transfer money to:</span>
+            <select name="to">
+            {% for user in users %}
+                {% if owner.id != user.id %} 
+                <option value="{{user.id}}">{{user.username}}</option>
+                {% endif %}
+            {% endfor %}
+            </select><br/>
+            <span>Amount:</span>
+            <input type="number" name="amount">
+            <input type="hidden" name="user_id" value={{owner.id}}>
+            <input type="submit" value="Transfer">
+        </form>   
+        <h6>{{request.session.message}}</h6> 
+    </div>
+</div>
+
+{% endblock %}

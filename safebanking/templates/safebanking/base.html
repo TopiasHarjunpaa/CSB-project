@@ -35,6 +35,12 @@
                     <a class="nav-link" href="/main/{{request.session.user_id}}">My account</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/deposit/{{request.session.user_id}}">Deposit</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/transfer/{{request.session.user_id}}">Transfer</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                 </li>
                 {% else %}

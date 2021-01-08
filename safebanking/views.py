@@ -64,22 +64,49 @@ def signinView(request):
     
 def mainView(request, User_account_id):
     user = User_account.objects.get(id = User_account_id)
+    return render(request, "safebanking/main.html", {"owner" : user})
+
+@csrf_exempt
+def transferView(request, User_account_id):
+    user = User_account.objects.get(id = User_account_id)
     users = User_account.objects.all()
-    return render(request, "safebanking/main.html", {"users" : users, "owner" : user})
+    request.session["message"] = ""
+    if request.method == "GET":
+        return render(request, "safebanking/transfer.html", {"users" : users, "owner" : user})
 
-def transferView(request):
-    to = User_account.objects.get(id = request.GET.get("to"))
-    user = User_account.objects.get(id = int(request.GET.get("user_id"))) #Reason for unsafety (better with session)
-    amount = int(request.GET.get("amount"))
+    if request.method == "POST":
+        to = User_account.objects.get(id = request.POST.get("to"))
+        amount = int(request.POST.get("amount"))
+        
+        #Prevent adding negative amounts etc...
+        if amount >= 0:
+            user.balance -= amount
+            to.balance += amount
+            user.save()
+            to.save()
+            request.session["message"] = "Succesfull transfer"      
+        else:
+            request.session["message"] = "Transfer failed"
 
-    #Prevent adding negative amounts etc...
-    if user.balance >= amount and to.username != user.username and amount >= 0:
-        user.balance -= amount
-        to.balance += amount
-        user.save()
-        to.save()
-        return redirect(reverse("main", kwargs = {"User_account_id" : user.id}))
-    else:
-        request.session["error"] = "Transfer failed"
-        return redirect("error")
+        return render(request, "safebanking/transfer.html", {"users" : users, "owner" : user})    
+
+@csrf_exempt
+def depositView(request, User_account_id):
+    user = User_account.objects.get(id = User_account_id)
+    request.session["message"] = ""
+    if request.method == "GET":
+        return render(request, "safebanking/deposit.html", {"owner" : user})
+
+    if request.method == "POST":
+        amount = int(request.POST.get("amount"))
+        
+        #Prevent adding negative amounts
+        if amount >= 0:
+            user.balance += amount
+            user.save()
+            request.session["message"] = "Succesfull deposit"      
+        else:
+            request.session["message"] = "Deposit failed"
+
+        return render(request, "safebanking/deposit.html", {"owner" : user})       
 

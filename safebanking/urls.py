@@ -8,5 +8,6 @@ urlpatterns = [
     path("main/<int:User_account_id>/", views.mainView, name = "main"),
     path("error/", views.errorView, name = "error"),
     path("logout/", views.logoutView, name = "logout"),
-    path("transfer/", views.transferView, name = "transfer")
+    path("transfer/<int:User_account_id>/", views.transferView, name = "transfer"),
+    path("deposit/<int:User_account_id>/", views.depositView, name = "deposit")
 ]
