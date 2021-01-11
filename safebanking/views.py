@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User_account
 from django.db.models import Q
 from django.urls import reverse
+from django.db import connection
 import json
 
 # Create your views here.
@@ -77,7 +78,7 @@ def transferView(request, User_account_id):
     if request.method == "POST":
         to = User_account.objects.get(id = request.POST.get("to"))
         amount = int(request.POST.get("amount"))
-        
+
         #Prevent adding negative amounts etc...
         if amount >= 0:
             user.balance -= amount
@@ -87,7 +88,8 @@ def transferView(request, User_account_id):
             request.session["message"] = "Succesfull transfer"      
         else:
             request.session["message"] = "Transfer failed"
-
+        
+        #Maybe redirect back to mainpage?
         return render(request, "safebanking/transfer.html", {"users" : users, "owner" : user})    
 
 @csrf_exempt
@@ -98,15 +100,14 @@ def depositView(request, User_account_id):
         return render(request, "safebanking/deposit.html", {"owner" : user})
 
     if request.method == "POST":
-        amount = int(request.POST.get("amount"))
-        
-        #Prevent adding negative amounts
-        if amount >= 0:
-            user.balance += amount
-            user.save()
-            request.session["message"] = "Succesfull deposit"      
-        else:
-            request.session["message"] = "Deposit failed"
+        amount = request.POST.get("amount")
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(f"UPDATE safebanking_user_account SET balance = balance + {amount} WHERE id = {User_account_id}")
+                request.session["message"] = "Succesfull deposit" 
+        except:
+            request.session["message"] = "Failed" 
 
+        #Maybe redirect back to mainpage?
         return render(request, "safebanking/deposit.html", {"owner" : user})       
 

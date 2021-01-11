@@ -10,7 +10,7 @@
         <h1 style="margin-bottom: 25px;">Deposit money</h1>
         <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
         <form action="/deposit/{{owner.id}}/" method="POST">
-            <input type="number" name="amount" placeholder="Amount">
+            <input type="text" name="amount" placeholder="Amount">
             <input type="hidden" name="user_id" value={{owner.id}}>
             <input type="submit" value="Deposit">
         </form>

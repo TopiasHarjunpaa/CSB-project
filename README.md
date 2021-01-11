@@ -1,28 +1,31 @@
 Cyber Security Base course project. 
 In this project, task is to create a web application that has at least five different flaws from the OWASP top ten list.
 
-Flaws:
-1. Password is stored without encryption into database
+LINK: link to the repository
+installation instructions if needed
 
-Solution:
-User password encryption or Django User model
+FLAW 1 - Injection:
+safebanking/views.py
+depositView method starting from the line xxx:
+Raw sql query has been used in a incorrect way. This allows users to write sql queries to the amount input field. For example user can write "1000--" which removes the WHERE clause and adds 1000 to everyones balance instead of just user.
+This can be fixed by replacing the line with cursor.execute("UPDATE safebanking_user_account SET balance = balance + %s WHERE id = %s", [amount, User_account_id]) which prevents possibility for sql instead. Even better way would be using the Django ORM tools and find user with user = User_account.objects.get(id = User_account_id) and then change the balance with user.balance += amount and finally save with user.save(). You can prevent any missuses by using simply if amount >= 0 etc... and handle the incorrect inputs with else: redirect... (in a similar way than it is handled at the transferView method above)
 
-2. Account profiles can be reached without authorisation
+FLAW 2 - Cross-site Request Forgery:
+exact source link pinpointing flaw 2...
+description of flaw 2...
+how to fix it...
 
-Solution:
-Redirect users without correct session_id to the error page.
+FLAW 3 - Cross-site Scripting:
+exact source link pinpointing flaw 2...
+description of flaw 2...
+how to fix it...
 
-3. xxxx
+FLAW 4 - Broken Access Control:
+exact source link pinpointing flaw 2...
+description of flaw 2...
+how to fix it...
 
-Solution:
-xxx
-
-4. xxxx
-
-Solution:
-xxx
-
-5. xxxx
-
-Solution:
-xxx
+FLAW 5 - Broken Authentication:
+exact source link pinpointing flaw 2...
+description of flaw 2...
+how to fix it...
