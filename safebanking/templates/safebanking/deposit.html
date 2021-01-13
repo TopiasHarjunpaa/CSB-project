@@ -1,0 +1,23 @@
+{% extends "./base.html" %}
+{% block title %}Login page{% endblock %}
+
+{% block content %}
+
+<div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
+            margin-bottom: 30px; min-height: 350px; border-radius: 50px;
+            margin-left: auto; margin-right: auto; max-width: 45em;">
+    <div style="text-align: center;">
+        <h1 style="margin-bottom: 25px;">Deposit money</h1>
+        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
+        
+        <form action="/deposit/{{owner.id}}/" method="POST">
+            {% csrf_token %}
+            <input type="text" name="amount" placeholder="Amount">
+            <input type="hidden" name="user_id" value={{owner.id}}>
+            <input type="submit" value="Deposit">
+        </form>
+        <h6>{{request.session.message}}</h6>   
+    </div>
+</div>
+
+{% endblock %}

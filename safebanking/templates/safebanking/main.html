@@ -1,13 +1,14 @@
 {% extends "./base.html" %}
-{% block title %}Start page{% endblock %}
+{% block title %}Login page{% endblock %}
+
 {% block content %}
 
 <div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
             margin-bottom: 30px; min-height: 350px; border-radius: 50px;
             margin-left: auto; margin-right: auto; max-width: 45em;">
     <div style="text-align: center;">
-        <h1 style="margin-bottom: 25px;">Welcome stranger</h1>
-        <h6>Log into Safebank or create a new account!</h6>
+        <h1 style="margin-bottom: 25px;">Welcome {{owner.username}}</h1>
+        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>      
     </div>
 </div>
 
