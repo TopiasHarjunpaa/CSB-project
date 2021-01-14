@@ -63,6 +63,13 @@ def signinView(request):
     
 def mainView(request, User_account_id):
     user = User_account.objects.get(id = User_account_id)
+
+    if request.method == "POST":
+        motto = request.POST.get("motto")
+        user.motto = motto
+        user.save()
+        return redirect(reverse("main", kwargs = {"User_account_id" : User_account_id}))
+
     return render(request, "safebanking/main.html", {"owner" : user})
 
 def transferView(request, User_account_id):

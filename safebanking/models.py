@@ -6,4 +6,5 @@ class User_account(models.Model):
 	username = models.TextField()
 	password = models.TextField()
 	balance = models.IntegerField()
+	motto = models.TextField(default = "")
 
