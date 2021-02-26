@@ -10,6 +10,9 @@
         <h1 style="margin-bottom: 25px;">Welcome {{owner.username}}</h1>
         <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
         <h6>Your motto: {{owner.motto|safe}}</h6>
+        <h6>Your account number: {{owner.account_number}}</h6>
+        <h6>Your status: {{owner.status}}</h6>
+
 
         <form method="POST">
             {% csrf_token %}

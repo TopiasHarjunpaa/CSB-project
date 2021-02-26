@@ -9,6 +9,8 @@ from django.db.models import Q
 from django.urls import reverse
 from django.db import connection
 import json
+from random import sample
+from string import digits
 
 # Create your views here.
 def index(request):
@@ -35,13 +37,17 @@ def loginView(request):
         user = User_account.objects.filter(username = username, password = password)
         #Check if there is user with same credentials on a database
         if len(user) != 0:
+            #Create sessions
             user_id = user[0].id
             request.session["user_id"] = user_id
+            if user[0].status == 2:
+                request.session["admin"] = True
+            else:
+                request.session["admin"] = False
             return redirect(reverse("main", kwargs = {"User_account_id" : user_id}))
         else:
             request.session["error"] = "Wrong username or password"
             return redirect("error")
-            #return render(request, "safebanking/error.html", {"message" : "Wrong username or password"})
 
 def signinView(request):
     if request.method == "GET":
@@ -54,13 +60,38 @@ def signinView(request):
         if len(User_account.objects.filter(username = username)) != 0:
             request.session["error"] = "User already exist!"
             return redirect("error") 
-            #return render(request, "safebanking/error.html", {"message" : "User already exist!"})
         else:
-            user = User_account.objects.create(username = username, password = password, balance = 1000)
+            #Draw account number
+            an = "".join(sample(list(digits), 4)) + "-" + "".join(sample(list(digits), 4))
+            user = User_account.objects.create(username = username, password = password, balance = 1000, account_number = an, status = 1) 
+            #Create sessions
             user_id = user.id
             request.session["user_id"] = user_id
+            if user.status == 2:
+                request.session["admin"] = True
+            else:
+                request.session["admin"] = False
+
             return redirect(reverse("main", kwargs = {"User_account_id" : user_id}))            
+
+def adminView(request, User_account_id):
+    user = User_account.objects.get(id = User_account_id)
+    users = User_account.objects.all()
     
+    if request.method == "POST":
+        #Add admin rights
+        if request.POST.get("new_admin_id") != None:
+            new_admin = User_account.objects.get(id = request.POST.get("new_admin_id"))
+            new_admin.status = 2
+            new_admin.save()
+        #Remove admin rights
+        if request.POST.get("old_admin_id") != None:
+            old_admin = User_account.objects.get(id = request.POST.get("old_admin_id"))
+            old_admin.status = 1
+            old_admin.save()
+
+    return render(request, "safebanking/admin.html", {"users" : users, "owner" : user})
+
 def mainView(request, User_account_id):
     user = User_account.objects.get(id = User_account_id)
 
@@ -92,7 +123,6 @@ def transferView(request, User_account_id):
         else:
             request.session["message"] = "Transfer failed"
     
-    #Maybe redirect back to mainpage?
     return render(request, "safebanking/transfer.html", {"users" : users, "owner" : user})    
 
 def depositView(request, User_account_id):
@@ -105,11 +135,11 @@ def depositView(request, User_account_id):
         amount = request.POST.get("amount")
         try:
             with connection.cursor() as cursor:
+                #In order to see balance update, it requires refreshing the page.
                 cursor.execute(f"UPDATE safebanking_user_account SET balance = balance + {amount} WHERE id = {User_account_id}")
-                request.session["message"] = "Succesfull deposit" 
+                request.session["message"] = "Succesfull deposit"
         except:
             request.session["message"] = "Failed" 
 
-        #Maybe redirect back to mainpage?
         return render(request, "safebanking/deposit.html", {"owner" : user})       
 

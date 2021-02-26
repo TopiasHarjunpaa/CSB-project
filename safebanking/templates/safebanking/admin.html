@@ -1,0 +1,55 @@
+{% extends "./base.html" %}
+{% block title %}Admin page{% endblock %}
+
+{% block content %}
+
+<div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
+            margin-bottom: 30px; min-height: 350px; border-radius: 50px;
+            margin-left: auto; margin-right: auto; max-width: 45em;">
+    <div style="text-align: center;">
+        <h1 style="margin-bottom: 25px;">Admin page</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="min-width: 70px;">Name</th>
+                    <th>Password</th>
+                    <th>Balance</th>
+                    <th>Motto</th>
+                    <th>Account number</th>
+                    <th>Status</th>
+                    <th>Make admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="font-size: 14px;">                   
+                    <td>{{user.username}}</td>
+                    <td>{{user.password}}</td>
+                    <td>{{user.balance}}</td>
+                    <td>{{user.motto}}</td>
+                    <td>{{user.account_number}}</td>
+                    <td>{{user.status}}</td>
+                    <td>
+                        {% if user.status != 2 %}
+                        <form action="/admin/{{owner.id}}/" method= "POST">
+                            {% csrf_token %}
+                            <input type="submit" value="Make admin" class="btn btn-outline-primary btn-sm"></input>
+                            <input type="hidden" name="new_admin_id" value="{{user.id}}">
+                        </form>
+                        {% else %}
+                        <form action="/admin/{{owner.id}}/" method= "POST">
+                            {% csrf_token %}
+                            <input type="submit" value="Remove admin" class="btn btn-outline-danger btn-sm"></input>
+                            <input type="hidden" name="old_admin_id" value="{{user.id}}">
+                        </form>                        
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

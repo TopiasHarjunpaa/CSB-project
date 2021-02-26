@@ -40,6 +40,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/transfer/{{request.session.user_id}}">Transfer</a>
                 </li>
+                {% if request.session.admin %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/{{request.session.user_id}}">Admin</a>
+                </li>
+                {% endif %}                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                 </li>
