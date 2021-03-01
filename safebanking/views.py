@@ -12,15 +12,20 @@ import json
 from random import sample
 from string import digits
 
-# Create your views here.
 def index(request):
-    return render(request, "safebanking/index.html")
+    #Check if user has already logged in
+    if request.session.get("user_id", None):
+        return redirect(reverse("main", kwargs = {"User_account_id" : request.session["user_id"]}))
+    else:        
+        return render(request, "safebanking/index.html")
 
 def errorView(request):
     return render(request, "safebanking/error.html")
 
 def logoutView(request):
     del request.session["user_id"]
+    del request.session["admin"]
+
     return redirect("index")
 
 def loginView(request):    
@@ -51,7 +56,11 @@ def loginView(request):
 
 def signinView(request):
     if request.method == "GET":
-        return render(request, "safebanking/signin.html")
+        #Check if user has already logged in
+        if request.session.get("user_id", None):
+            return redirect(reverse("main", kwargs = {"User_account_id" : request.session["user_id"]}))
+        else:        
+            return render(request, "safebanking/signin.html")
     
     if request.method == "POST":
         username = request.POST["username"]

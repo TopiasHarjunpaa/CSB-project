@@ -42,7 +42,7 @@ There are no complexity requirements for the password.
 How to fix - Create complexity
 
 FLAW 6 - Sensity Data Exposure
-Password and account number can be considered as a sensitive data and these are not encrypted at all. Ultimately both data can be seen from admin panel which is possible for anyone to access (See FLAW 4)
+Password and (and perhaps sometimes account number) can be considered as a sensitive data and these are not encrypted at all. Ultimately both data can be seen from admin panel which is possible for anyone to access (See FLAW 4)
 
 How to fix - Django has a built in User model which contains several fields including encrypted passwords and permissions. Instead of making a User_account model (like in this case), we could have used Djangos User model and additional Account model with a reference to the User model like this way:
 
