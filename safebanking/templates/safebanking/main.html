@@ -6,24 +6,30 @@
 <div style="background-color: rgb(252, 252, 252, 0.5); margin-top: 30px;
             margin-bottom: 30px; min-height: 350px; border-radius: 50px;
             margin-left: auto; margin-right: auto; max-width: 45em;">
+    
+    <div style="height:20px"></div>
     <div style="text-align: center;">
         <h1 style="margin-bottom: 25px;">Welcome {{owner.username}}</h1>
-        <h6>Your balance {{owner.balance}} € ({{request.session.user_id}})</h6>
-        <h6>Your motto: {{owner.motto|safe}}</h6>
+        <h6>Your balance {{owner.balance}} €</h6>
         <h6>Your account number: {{owner.account_number}}</h6>
-        <h6>Your status: {{owner.status}}</h6>
-
-
+    </div>
+    
+    
+    <div style="text-align: center; margin-top: 25px;">
+        {% if owner.motto == "" %}
+        <h6>You do not have a motto yet.</h6>
+        {% else %}
+        <h6>Your motto: {{owner.motto|safe}}</h6>
+        {% endif %}
         <form method="POST">
             {% csrf_token %}
             <div class="d-flex justify-content-center">
-                <input type="text" class="border border-dark shadow-lg form-control" placeholder="Add your motto" name="motto" style="width: 300px;"/>
-            </div>
-            <div class="d-flex justify-content-center">   
-                <input type="submit" value="Add" class="shadow-lg btn btn-outline-dark btn-lg" style="margin-top: 20px"></input>
-            </div>     
+                <input type="text" class="border border-dark shadow-lg form-control" placeholder="Write your motto" name="motto" style="width: 250px; height: 32px"/>
+                <input type="submit" value="Add" class="shadow-lg btn btn-outline-dark btn-sm" style="margin-left: 5px"></input>
+            </div>  
         </form>
     </div>
+
 </div>
 
 {% endblock %}
