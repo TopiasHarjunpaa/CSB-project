@@ -23,9 +23,9 @@ $ python3 manage.py runserver
 ```
 
 ## FLAW 1 - Injection:
-[Location of the flaw](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
+[Location of the flaw (views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
 
-#### description
+#### Description
 Raw sql query has been used in this method. Right now the query is following:
 
 ```
@@ -34,7 +34,7 @@ cursor.execute(f"UPDATE safebanking_user_account SET balance = balance + {amount
 
 This gives the non-friendly user possibility to make sql injection. Instead of typing amount to the input field in a application, user can type for example "1000--" which removes the whole WHERE clause and adds 1000 to everyones balance instead of just for current user.
 
-#### how to fix
+#### How to fix
 To prevent sql injection in a raw sql query, we could replace the query with following:
 
 ```
@@ -53,14 +53,30 @@ And of course it could be a good idea to prevent users for adding a negative amo
 
 
 ## FLAW 2 - Cross-site Request Forgery:
-safebanking/views.py and safebanking/templates/safebanking/transfer.html
-transferView method starting from the line xxx:
+[Location of the flaw (views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/views.py#L115)
+[Location of the flaw (transfer.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/templates/safebanking/transfer.html#L17)
 
-#### description
-This uses request.GET method without csrf protection. To test this vulnerability, there are file in a location Csrf_test/crsftest.html which transfers 10 balance out from the first user (id=1) and gives it to the second user (id=2).
+#### Description
+This uses request.GET method without csrf protection. To test this vulnerability, there are file [crsftest.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/Csrf_test/crsftest.html#L4) which transfers 10 balance out from the first user (id=1) and gives it to the second user (id=2). Just make sure that there are at least 2 users created at the application
 
-#### how to fix
-This can be fixed by changing the form method into POST and making a csrf token verification {% csrf_token %} at the safebanking/templates/safebanking/transfer.html. 
+#### How to fix
+This can be fixed by changing the form method into POST (both views.py and transfer.html) and making a csrf token verification (transfer.html)
+
+Current solution:
+
+```
+<form action="/transfer/{{owner.id}}/" method="GET">
+    <h6>Transfer money to:</h6>
+    ...
+```
+Fixed solution:
+
+```
+<form action="/transfer/{{owner.id}}/" method="POST">
+    {% csrf_token %}
+    <h6>Transfer money to:</h6>
+    ...
+```
 
 ## FLAW 3 - Cross-site Scripting:
 safebanking/views.py and safebanking/templates/safebanking/main.html
