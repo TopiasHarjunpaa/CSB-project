@@ -1,8 +1,22 @@
 # Cyber Security Base course project. 
 In this project, task is to create a web application that has at least five different flaws from the OWASP top ten list.
 
-LINK: link to the repository
-installation instructions if needed
+[Link to the repository](https://github.com/TopiasHarjunpaa/CSB-project)
+
+## Installation instructions
+
+Requires Python 3 (3.5 or higher)
+
+Instructions for [installing Python and additional packages](https://cybersecuritybase.mooc.fi/installation-guide)
+
+Clone repository:
+
+$ git clone git@github.com:TopiasHarjunpaa/CSB-project.git
+$ cd CSB-project
+
+Run application:
+
+$ python3 manage.py runserver
 
 ## FLAW 1 - Injection:
 safebanking/views.py
