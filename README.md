@@ -23,7 +23,7 @@ $ python3 manage.py runserver
 ```
 
 ## FLAW 1 - Injection:
-Location of the flaw [(views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
+Location of the flaw [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
 
 #### Description
 Raw sql query has been used in this method. Right now the query is following:
@@ -53,7 +53,7 @@ And of course it could be a good idea to prevent users for adding a negative amo
 
 
 ## FLAW 2 - Cross-site Request Forgery:
-Location of the flaws [(views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/views.py#L115) and [(transfer.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/templates/safebanking/transfer.html#L17)
+Location of the flaws [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/views.py#L115) and [transfer.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/templates/safebanking/transfer.html#L17)
 
 #### Description
 This uses request.GET method without csrf protection. To test this vulnerability, there are file [crsftest.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/Csrf_test/crsftest.html#L4) which transfers 10 balance out from the first user (id=1) and gives it to the second user (id=2). Just make sure that there are at least 2 users created at the application
@@ -78,55 +78,54 @@ Fixed solution:
 ```
 
 ## FLAW 3 - Cross-site Scripting:
-Location of the flaws [(views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/views.py#L104) and [(main.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
+Location of the flaws [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/views.py#L104) and [main.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
 
 safebanking/views.py and safebanking/templates/safebanking/main.html
 mainView method starting from the line xxx:
 
-#### description
+#### Description
 From the main page user can add a personal motto which is stored into database. Default motto is empty, but user is allowed to add or edit the motto by using the form. The motto will be rendered and shown at the same main page. There are however two problems with the current approach: 
 - Firstly there are no restrictions which prevents other users for reaching certain main page. Mainpage path is `/main/{user_id}/` but the method does not check if the user is actually the owner of that id. Any user who has logged in can reach anyones mainpage and edit their mottos.
-- Secondly [(main.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22) page has flagged motto's to be safe. This makes it vulnerable for XXS. For example user `with id = 1` can go to the second users `with id = 2` mainpage using the path `/main/2/` and create a new motto, such as:
+- Secondly [main.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22) page has flagged motto's to be safe. This makes it vulnerable for XXS. For example user `with id = 1` can go to the second users `with id = 2` mainpage using the path `/main/2/` and create a new motto, such as: `<script>alert("You are hacked");</script>`. When the second user `with id = 2` logs in, she/he will get a pop up window with the text `You are hacked` instead of mainpage.
 
- `<script>alert("You are hacked");</script>`
-  
-When the second user `with id = 2` logs in, she/he will get a pop up window with the text `You are hacked` instead of mainpage.
+#### How to fix
+To prevent this happening, simple replace `{{owner.motto|safe}}` with `{{owner.motto}}` from [main.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
 
-#### how to fix
-To prevent this happening, simple replace `{{owner.motto|safe}}` with `{{owner.motto}}` from [(main.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
-
-Also it would be a good idea to add a check for the [(mainView method)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22) that the `User_account_id` (which is recieved from the path) matches with `session.user_id` (which is stored for user session during login). As matter of fact, in this kind of application, there probably wouldn't be a need for other users to visit other pages, so the whole `User_account_id` could be removed from the path and user could be determined from the `session.user_id` instead.
+Also it would be a good idea to add a check for the [mainView](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22) method that the `User_account_id` (which is recieved from the path) matches with `session.user_id` (which is stored for user session during login). As matter of fact, in this kind of application, there probably wouldn't be a need for other users to visit other pages, so the whole `User_account_id` could be removed from the path and user could be determined from the `session.user_id` instead.
 
 ## FLAW 4 - Broken Access Control:
-safebanking/views.py and safebanking/templates/safebanking/admin.html
+Location of the flaws [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/views.py#L86) and [admin.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/templates/safebanking/admin.html#L14)
 
-#### description
-adminView allows admin users to access admin panel where they can see database information from all users and make admin promotions / demotions. There are some flaws on this approuch:
-- Firstly there are no actual checking if the user who tries to access admin panel has admin rights. Link to the admin panel is hidden for non-admin users at safebanking/templates/safebanking/base.html line xxx. However, anyone can reach the admin pages by using the addres /admin/user_id/ (any valid user id works there).
-- Secondly anyone who can get into the admin panel and modify the admin rights for any user. This means that the user who does not have admin rights can promote herself/himself and even demote everyone else.
+#### Description
+[adminView](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/views.py#L86) method allows admin users to access admin panel where they can see database information from all users and make admin promotions / demotions. There are some flaws on this approach:
+- Firstly, there are no actual checking if the user who tries to access admin panel has the admin rights. Link to the admin panel is hided from non-admin users at the [base.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/templates/safebanking/base.html#L40). However, anyone can reach the admin pages by using the path `/admin/user_id/` (any valid user id works there).
+- Secondly, anyone who can get into the admin panel can modify the admin rights for any users. This means that the user who does not have admin rights in first place, can promote herself/himself and even demote everyone else.
 
-#### how to fix
-Easiest way to fix this flaw is to entirely remove this feature. Django has its own "Django Admin site" where admin users can explore and make modifications. Admin users can be created from the command line by typing $ python manage.py createsuperuser and following the instructions. Models can be make modifiable from safebanking/admin.py by adding for example in this case line admin.site.register(User_account). 
+#### How to fix
+Easiest way to fix this flaw is to entirely remove this feature. Django has its own [Django Admin site](https://docs.djangoproject.com/en/3.1/intro/tutorial02/) where admin users can explore and make modifications. Admin users can be created from the command line by typing `$ python3 manage.py createsuperuser` and following the instructions. Models can be made modifiable from [admin.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/admin.py#L5) by adding for example (like in this case) line `admin.site.register(User_account)`. 
 
 ## FLAW 5 - Broken Authentication:
+Location of the flaws [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/views.py#L67) and [models.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/models.py#L7)
 
-#### description
-There are no complexity requirements for the password. Basically user can choose whatever password they prefers, such as "password" or "1234" Secondly, the passwords are stored into database as a plain textfield without any encryption at all.
+#### Description
+There are no complexity requirements for the password. Basically user can choose whatever password they prefers, such as `password` or `1234` Secondly, the passwords are stored into database as a plain textfield without any encryption at all.
 
-#### how to fix
-Restrict users to choose whatever password they prefer. One solution could be create a function which checks the password input and makes sure it does has certain complexity (such as minimun length, lower- and uppercase letters and some special characters). Also there could be a another function which tests the password input by going through list of top 10000 words passwords and prevents users from choosing those. Solution for encryption problem is explained at the FLAW 6.
+#### How to fix
+Restrict users to choose whatever password they prefer. One solution could be create a function which checks the password input and makes sure that it does have a certain complexity (such as minimun length, lower- and uppercase letters and some special characters). Also there could be a another function which tests the password input by going through list of [top 10000 worst passwords](https://github.com/danielmiessler/SecLists/tree/master/Passwords) and prevents users from choosing them. Solution for encryption problem is explained at the next flaw.
 
 ## FLAW 6 - Sensity Data Exposure
+Location of the flaws [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/views.py#L67) and [models.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/8605f40a2531246e9b2f4095681ed5febf801584/safebanking/models.py#L7)
 
-#### description
-Password and (and perhaps sometimes account number) can be considered as a sensitive data and these are not encrypted at all. Ultimately both data can be seen from admin panel which is possible for anyone to access (See FLAW 4)
+#### Description
+Password and (and perhaps sometimes account numbers) can be considered as a sensitive data and these are not encrypted at all. Ultimately both data can be seen from admin panel which is possible for anyone to access (See FLAW 4)
 
-#### how to fix
-Django has a built in User model which contains several fields including encrypted passwords and permissions. Instead of making a User_account model (like in this case) we could have used Djangos User model and additional Account model with a reference to the User model like this way:
+#### How to fix
+Django has a built in `User model` which contains several fields including encrypted passwords and permissions. Instead of making a `User_account model` (like in this case) we could have used Djangos `User model` and additional `Account model` with a reference to the `User model` like this way:
 
+```
 class Account(models.Model):
     owner = models.ForeignKey(User)
     balance = models.IntegerField()
-    motto = models.TextField()
-    account_number = models.TextField()
+    ...
+```
 
