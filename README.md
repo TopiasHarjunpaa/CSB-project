@@ -23,16 +23,34 @@ $ python3 manage.py runserver
 ```
 
 ## FLAW 1 - Injection:
-safebanking/views.py
-depositView method starting from the line xxx:
-https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137
+[Location of the flaw](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
 
 #### description
-Raw sql query has been used in a incorrect way. This allows users to write sql queries to the amount input field. For example user can write "1000--" which removes the WHERE clause and adds 1000 to everyones balance instead of just user.
-This can be fixed by replacing the line with cursor.execute("UPDATE safebanking_user_account SET balance = balance + %s WHERE id = %s", [amount, User_account_id]) which prevents possibility for sql instead. Even better way would be using the Django ORM tools and find user with user = User_account.objects.get(id = User_account_id) and then change the balance with user.balance += amount and finally save with user.save(). 
+Raw sql query has been used in this method. Right now the query is following:
+
+```
+cursor.execute(f"UPDATE safebanking_user_account SET balance = balance + {amount} WHERE id = {User_account_id}")
+```
+
+This gives the non-friendly user possibility to make sql injection. Instead of typing amount to the input field in a application, user can type for example "1000--" which removes the whole WHERE clause and adds 1000 to everyones balance instead of just for current user.
 
 #### how to fix
-You can prevent any missuses by using simply if amount >= 0 etc... and handle the incorrect inputs with else: redirect... (in a similar way than it is handled at the transferView method above)
+To prevent sql injection in a raw sql query, we could replace the query with following:
+
+```
+cursor.execute("UPDATE safebanking_user_account SET balance = balance + %s WHERE id = %s", [amount, User_account_id])
+```
+
+Perhaps even better way would be using the Django ORM tools:
+
+```
+user = User_account.objects.get(id = User_account_id)
+amount = request.POST.get("amount")
+user.balance += amount
+user.save()
+```
+And of course it could be a good idea to prevent users for adding a negative amounts etc.
+
 
 ## FLAW 2 - Cross-site Request Forgery:
 safebanking/views.py and safebanking/templates/safebanking/transfer.html
