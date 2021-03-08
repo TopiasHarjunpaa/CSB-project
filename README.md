@@ -11,16 +11,21 @@ Instructions for [installing Python and additional packages](https://cybersecuri
 
 Clone repository:
 
+```
 $ git clone git@github.com:TopiasHarjunpaa/CSB-project.git
 $ cd CSB-project
+```
 
 Run application:
 
+```
 $ python3 manage.py runserver
+```
 
 ## FLAW 1 - Injection:
 safebanking/views.py
 depositView method starting from the line xxx:
+https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137
 
 #### description
 Raw sql query has been used in a incorrect way. This allows users to write sql queries to the amount input field. For example user can write "1000--" which removes the WHERE clause and adds 1000 to everyones balance instead of just user.
