@@ -23,7 +23,7 @@ $ python3 manage.py runserver
 ```
 
 ## FLAW 1 - Injection:
-[Location of the flaw (views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
+Location of the flaw [(views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/d7e07727fffcd323dab6d205e9d0b54e1e4e78d7/safebanking/views.py#L137)
 
 #### Description
 Raw sql query has been used in this method. Right now the query is following:
@@ -53,8 +53,7 @@ And of course it could be a good idea to prevent users for adding a negative amo
 
 
 ## FLAW 2 - Cross-site Request Forgery:
-[Location of the flaw (views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/views.py#L115)
-[Location of the flaw (transfer.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/templates/safebanking/transfer.html#L17)
+Location of the flaws [(views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/views.py#L115) and [(transfer.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/safebanking/templates/safebanking/transfer.html#L17)
 
 #### Description
 This uses request.GET method without csrf protection. To test this vulnerability, there are file [crsftest.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/8d752cc92868132556eb27af96775cd3543cfd91/Csrf_test/crsftest.html#L4) which transfers 10 balance out from the first user (id=1) and gives it to the second user (id=2). Just make sure that there are at least 2 users created at the application
@@ -79,16 +78,24 @@ Fixed solution:
 ```
 
 ## FLAW 3 - Cross-site Scripting:
+Location of the flaws [(views.py)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/views.py#L104) and [(main.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
+
 safebanking/views.py and safebanking/templates/safebanking/main.html
 mainView method starting from the line xxx:
 
 #### description
-From the main page user can add a personal motto which is stored into database. Default motto is empty but user is allowed to add or edit the motto by using the form. The motto will be rendered and shown at the same main page. There are however two problems with the current approach: 
-- Firstly there are no restrictions which prevents other users for reaching certain main page. Mainpage path is /main/{user_id}/ but the method does not check if the user is actually correct one. Any user who has logged in can reach anyones mainpage and edit their mottos.
-- Secondly main.html page has flagged motto's to be safe on a line xxx. This makes it vulnerable for XXS. For example user (for example with id=1) can go the second user (id=2) mainpage using the path /main/2/ and type a for example new motto "<script>alert("You are hacked");</script>". When the second user (id=2) logs in, she/he will get a pop up window with the text "You are hacked" instead of mainpage.
+From the main page user can add a personal motto which is stored into database. Default motto is empty, but user is allowed to add or edit the motto by using the form. The motto will be rendered and shown at the same main page. There are however two problems with the current approach: 
+- Firstly there are no restrictions which prevents other users for reaching certain main page. Mainpage path is `/main/{user_id}/` but the method does not check if the user is actually the owner of that id. Any user who has logged in can reach anyones mainpage and edit their mottos.
+- Secondly [(main.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22) page has flagged motto's to be safe. This makes it vulnerable for XXS. For example user `with id = 1` can go to the second users `with id = 2` mainpage using the path `/main/2/` and create a new motto, such as:
+
+ `<script>alert("You are hacked");</script>`
+  
+When the second user `with id = 2` logs in, she/he will get a pop up window with the text `You are hacked` instead of mainpage.
 
 #### how to fix
-To prevent this happening, safe flagging needs to be removed from the main.html at line xxx. Also it would be a good idea to add a check for the mainView method that the User_account_id (which is recieved from the path) matches with session.user_id (which is stored for user session during login). As matter of fact, in this kind of application, there probably wouldn't be a need for other users to vsit other pages, so the whole User_account_id could be removed from the path and user could be determined from the session.user_id instead.
+To prevent this happening, simple replace `{{owner.motto|safe}}` with `{{owner.motto}}` from [(main.html)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
+
+Also it would be a good idea to add a check for the [(mainView method)](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22) that the `User_account_id` (which is recieved from the path) matches with `session.user_id` (which is stored for user session during login). As matter of fact, in this kind of application, there probably wouldn't be a need for other users to visit other pages, so the whole `User_account_id` could be removed from the path and user could be determined from the `session.user_id` instead.
 
 ## FLAW 4 - Broken Access Control:
 safebanking/views.py and safebanking/templates/safebanking/admin.html
