@@ -81,9 +81,6 @@ Fixed solution:
 ## FLAW 3 - Cross-site Scripting:
 Location of the flaws [views.py](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/views.py#L104) and [main.html](https://github.com/TopiasHarjunpaa/CSB-project/blob/a6206e61d4ec13411bc75c9bf6456906754bc9f1/safebanking/templates/safebanking/main.html#L22)
 
-safebanking/views.py and safebanking/templates/safebanking/main.html
-mainView method starting from the line xxx:
-
 #### Description
 From the main page user can add a personal motto which is stored into database. Default motto is empty, but user is allowed to add or edit the motto by using the form. The motto will be rendered and shown at the same main page. There are however two problems with the current approach: 
 - Firstly there are no restrictions which prevents other users for reaching certain main page. Mainpage path is `/main/{user_id}/` but the method does not check if the user is actually the owner of that id. Any user who has logged in can reach anyones mainpage and edit their mottos.
